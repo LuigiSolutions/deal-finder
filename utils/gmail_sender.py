@@ -93,7 +93,7 @@ def send_email(to_email, subject, body, from_name="Kalob Hagen", reply_to=None):
 
 
 def test_connection() -> tuple:
-    """Return (ok: bool, detail: str). detail is an email address on success or an error message on failure."""
+    """Return (ok: bool, detail: str). detail is the sender address on success or an error on failure."""
     if not GMAIL_AVAILABLE:
         return False, "google-auth libraries not installed (check requirements.txt)"
     if not st.secrets.get("GMAIL_CREDENTIALS_JSON", ""):
@@ -101,8 +101,7 @@ def test_connection() -> tuple:
     service = get_gmail_service()
     if not service:
         return False, "Failed to initialize Gmail service (see warning above)"
-    try:
-        profile = service.users().getProfile(userId="me").execute()
-        return True, profile.get("emailAddress", "connected")
-    except Exception as e:
-        return False, str(e)
+    # get_gmail_service() already called creds.refresh() successfully — token is valid.
+    # getProfile requires gmail.readonly which exceeds the gmail.send scope we authorized.
+    from_addr = st.secrets.get("GMAIL_FROM_ADDRESS", "configured")
+    return True, f"ready to send from {from_addr}"
