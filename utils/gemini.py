@@ -12,7 +12,7 @@ import requests
 from typing import Optional
 
 OPENROUTER_BASE = "https://openrouter.ai/api/v1/chat/completions"
-DEFAULT_MODEL = "meta-llama/llama-3.1-8b-instruct:free"
+DEFAULT_MODEL = "mistralai/mistral-7b-instruct:free"
 
 
 def get_model():
@@ -40,13 +40,20 @@ def ask(prompt: str, system: str = "", retries: int = 3) -> Optional[str]:
                 json={"model": model, "messages": messages},
                 timeout=45,
             )
-            resp.raise_for_status()
+            if not resp.ok:
+                err = f"{resp.status_code} {resp.reason}: {resp.text[:300]}"
+                is_rate_limit = resp.status_code == 429
+                if is_rate_limit and attempt < retries - 1:
+                    time.sleep((attempt + 1) * 15)
+                else:
+                    st.warning(f"AI error: {err}")
+                    return None
+                continue
             return resp.json()["choices"][0]["message"]["content"]
         except Exception as e:
             err = str(e)
-            is_rate_limit = "429" in err or "quota" in err.lower() or "rate" in err.lower()
-            if is_rate_limit and attempt < retries - 1:
-                time.sleep((attempt + 1) * 15)
+            if attempt < retries - 1:
+                time.sleep((attempt + 1) * 5)
             else:
                 st.warning(f"AI error: {err}")
                 return None
