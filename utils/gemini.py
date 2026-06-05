@@ -28,7 +28,7 @@ def get_model():
     if not api_key:
         return None
     genai.configure(api_key=api_key)
-    return genai.GenerativeModel("gemini-2.0-flash")
+    return genai.GenerativeModel("gemini-2.0-flash-lite")
 
 
 def ask(prompt: str, system: str = "", retries: int = 3) -> Optional[str]:
@@ -45,10 +45,10 @@ def ask(prompt: str, system: str = "", retries: int = 3) -> Optional[str]:
             return response.text
         except Exception as e:
             err = str(e)
-            if "429" in err or "quota" in err.lower():
+            if ("429" in err or "quota" in err.lower()) and attempt < retries - 1:
                 wait = (attempt + 1) * 15  # 15s, 30s, 45s
                 time.sleep(wait)
-            elif attempt == retries - 1:
+            else:
                 st.warning(f"Gemini error: {err}")
                 return None
     return None
