@@ -8,6 +8,8 @@ from datetime import datetime
 from typing import Optional
 import json
 
+from utils.vault import write_lead as _vault_write_lead, log_outreach_to_vault as _vault_log_outreach
+
 try:
     from supabase import create_client, Client
     SUPABASE_AVAILABLE = True
@@ -92,6 +94,8 @@ CREATE INDEX IF NOT EXISTS outreach_sent_idx ON outreach(sent_at DESC);
 
 def upsert_lead(data: dict) -> Optional[dict]:
     """Insert a lead or update if name+address already exists."""
+    _vault_write_lead(data)
+
     client = get_client()
     if not client:
         return _local_store("leads", data)
@@ -142,6 +146,12 @@ def update_lead_status(lead_id: int, status: str, notes: str = None):
 
 def log_outreach(data: dict) -> Optional[dict]:
     """Record every email sent."""
+    _vault_log_outreach(
+        lead_name=data.get("owner_name") or data.get("lead_type", "lead"),
+        subject=data.get("subject", ""),
+        body=data.get("body", ""),
+    )
+
     client = get_client()
     if not client:
         return _local_store("outreach", data)
