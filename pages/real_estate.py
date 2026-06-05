@@ -109,7 +109,11 @@ def _run_re_agent(city: str, auto_email: bool, min_score: int, use_demo: bool):
         log_lines.append(f"[{datetime.now().strftime('%H:%M:%S')}] Saved {leads_found} leads")
 
         # Step 3: Email qualifying leads
-        qualifying = [l for l in raw_leads if l.get("score", 0) >= min_score and l.get("owner_email")]
+        qualifying = sorted(
+            [l for l in raw_leads if l.get("score", 0) >= min_score and l.get("owner_email")],
+            key=lambda l: l.get("score", 0),
+            reverse=True
+        )
 
         if auto_email and qualifying:
             st.write(f"📬 Writing and sending emails to {len(qualifying)} qualifying leads (score ≥ {min_score})...")

@@ -119,7 +119,7 @@ def get_leads(lead_type: str = None, status: str = None, limit: int = 200) -> li
     if not client:
         return _local_read("leads")
 
-    query = client.table("leads").select("*").order("created_at", desc=True).limit(limit)
+    query = client.table("leads").select("*").order("score", desc=True).order("created_at", desc=True).limit(limit)
     if lead_type:
         query = query.eq("type", lead_type)
     if status:
