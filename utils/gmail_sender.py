@@ -1,8 +1,6 @@
 """
 Gmail API sender — completely free
 Uses OAuth2 service account or user credentials via Google Cloud free tier.
-
-Setup guide is in README.md. No cost ever — Gmail API has no usage fees.
 """
 
 import streamlit as st
@@ -22,13 +20,13 @@ except ImportError:
 
 
 def get_gmail_service():
-    """Return authenticated Gmail service from stored credentials."""
     if not GMAIL_AVAILABLE:
         return None
 
     creds_json = st.secrets.get("GMAIL_CREDENTIALS_JSON", "")
     if not creds_json:
         return None
+    creds_json = creds_json.replace("\n", "").replace("  ", " ").strip()
 
     try:
         creds_data = json.loads(creds_json)
@@ -46,26 +44,13 @@ def get_gmail_service():
         return None
 
 
-def send_email(
-    to_email: str,
-    subject: str,
-    body: str,
-    from_name: str = "Kalob Hagen",
-    reply_to: str = None
-) -> dict:
-    """
-    Send an email via Gmail API.
-    Returns: {"success": bool, "message_id": str|None, "error": str|None, "simulated": bool}
-    """
-
-    # Validate email
+def send_email(to_email, subject, body, from_name="Kalob Hagen", reply_to=None):
     if not to_email or "@" not in to_email:
         return {"success": False, "message_id": None, "error": "Invalid email address", "simulated": False}
 
     service = get_gmail_service()
 
     if not service:
-        # Simulate mode — log but don't actually send (for testing without Gmail setup)
         st.info(f"📧 [SIMULATED] Would send to: {to_email} | Subject: {subject}")
         return {"success": True, "message_id": f"simulated_{to_email}", "error": None, "simulated": True}
 
@@ -78,13 +63,10 @@ def send_email(
         if reply_to:
             msg["Reply-To"] = reply_to
 
-        # Plain text + simple HTML
         text_part = MIMEText(body, "plain")
         html_body = body.replace("\n", "<br>")
         html_part = MIMEText(
-            f"""<html><body style="font-family:Georgia,serif;font-size:15px;color:#222;max-width:580px;line-height:1.6;">
-            {html_body}
-            </body></html>""",
+            f'<html><body style="font-family:Georgia,serif;font-size:15px;color:#222;max-width:580px;line-height:1.6;">{html_body}</body></html>',
             "html"
         )
         msg.attach(text_part)
@@ -98,8 +80,7 @@ def send_email(
         return {"success": False, "message_id": None, "error": str(e), "simulated": False}
 
 
-def test_connection() -> bool:
-    """Quick connectivity test."""
+def test_connection():
     service = get_gmail_service()
     if not service:
         return False
