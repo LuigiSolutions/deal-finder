@@ -14,12 +14,12 @@ Two AI agents that run on demand:
 - Scores each lead 1-10 using a 4-factor rubric (timeline, bank involvement, down payment, motivation signals)
 - Highest-scoring leads contacted first
 - Writes personalized outreach emails via OpenRouter AI
-- Sends via Gmail API and logs everything to Supabase
+- Sends via Gmail API and logs everything to Supabase + Obsidian vault
 
 **Business Agent**
 - Searches BizBuySell + web for owner-operated Northern Michigan businesses
 - Targets SBA 7(a) + seller carry acquisitions (near-zero down)
-- Same scoring, ordering, and email pipeline
+- Same scoring, ordering, email, and vault pipeline
 
 **Outreach Log**
 - Every email sent: owner name, email, subject, full body, date/time stamp
@@ -27,6 +27,13 @@ Two AI agents that run on demand:
 
 **Settings → Test Outreach tab**
 - Generate real AI emails from demo leads and send to yourself before going live
+- Not logged to vault or database — preview only
+
+**Obsidian Knowledge Graph**
+- Every lead auto-written as a markdown note to `vault/`
+- Demo leads → `vault/leads/demo/`, real leads → `vault/leads/`
+- Hub notes for cities, deal types, and owners create graph clusters automatically
+- Open `vault/` folder in Obsidian to see the interactive knowledge graph
 
 ---
 
@@ -38,6 +45,7 @@ Two AI agents that run on demand:
 | Supabase (Database) | Free | 500MB, unlimited API calls |
 | Gmail API (Email) | Free | No usage fees |
 | Streamlit Cloud (Hosting) | Free | Unlimited public apps |
+| Obsidian | Free | Local app; open vault/ folder as a vault |
 
 ---
 
@@ -46,12 +54,13 @@ Two AI agents that run on demand:
 ### 1. OpenRouter API Key (2 min)
 1. Go to https://openrouter.ai/ → sign up free (no credit card)
 2. Click **Keys** → **Create Key**
-3. Go to https://openrouter.ai/models?q=free and pick a free model — copy its ID
+3. Go to https://openrouter.ai/models?q=free and pick a free model — copy its exact ID
 4. Add to Streamlit secrets:
    ```
    OPENROUTER_API_KEY = "sk-or-..."
    OPENROUTER_MODEL = "openai/gpt-oss-120b:free"
    ```
+   If a model gets removed, update `OPENROUTER_MODEL` in Streamlit secrets — no code push needed.
 
 ### 2. Supabase (10 min)
 1. Create free project at https://supabase.com
@@ -75,6 +84,12 @@ Two AI agents that run on demand:
 1. Push to a GitHub repo (never commit `.streamlit/secrets.toml`)
 2. Go to https://share.streamlit.io → Deploy → select `app.py`
 3. Add all secrets in App Settings → Secrets → Save
+
+### 5. Obsidian Knowledge Graph (1 min)
+1. Download Obsidian at https://obsidian.md (free)
+2. Open Obsidian → **Open folder as vault**
+3. Navigate to the `vault/` folder inside this project
+4. Click **Open** — the graph is ready with 6 demo leads pre-seeded
 
 ---
 
@@ -102,6 +117,19 @@ Higher score = better deal for a buyer who wants little to no money down and no 
 
 A **10** = sell immediately, $0 down, no bank involved.  
 A **1** = selling someday, large down payment, bank only.
+
+---
+
+## Email Writing Rules
+
+Every outreach email enforces these rules via prompt injection:
+- No em dashes (—)
+- No exclamation points
+- No filler openers ("I hope this finds you well", "I came across", "I wanted to reach out")
+- No corporate buzzwords
+- Short sentences, plain English
+- First name sign-off only
+- Exactly one low-pressure question at the end
 
 ---
 
@@ -135,6 +163,12 @@ utils/
   gemini.py               — OpenRouter AI: prompts, EMAIL_RULES, SCORING_RUBRIC
   gmail_sender.py         — Gmail API email sender (auto token refresh)
   scraper.py              — Free web scrapers + demo lead data
+  vault.py                — Obsidian vault writer (auto-called on every lead save)
+vault/
+  Home.md                 — Project overview note
+  leads/                  — Real lead notes (live scraping)
+  leads/demo/             — Demo lead notes (demo mode)
+  _hubs/                  — City, deal type, owner hub notes (graph clusters)
 .streamlit/
   config.toml             — Dark theme (navy/gold)
   secrets.toml            — Your API keys (never commit this)
