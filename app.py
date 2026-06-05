@@ -188,7 +188,7 @@ st.markdown('<div class="sub-header">AI-powered acquisition lead discovery & out
 st.sidebar.markdown("## Navigation")
 page = st.sidebar.radio(
     "",
-    ["📊 Dashboard", "🏠 Real Estate Agent", "🏢 Business Agent", "📬 Outreach Log", "⚙️ Settings"],
+    ["📊 Dashboard", "🏠 Real Estate Agent", "🏢 Business Agent", "📬 Outreach Log", "🕸️ Knowledge Graph", "⚙️ Settings"],
     label_visibility="collapsed"
 )
 
@@ -216,6 +216,9 @@ elif page == "🏢 Business Agent":
 elif page == "📬 Outreach Log":
     from pages import outreach_log
     outreach_log.render()
+elif page == "🕸️ Knowledge Graph":
+    from pages import graph
+    graph.render()
 elif page == "⚙️ Settings":
     from pages import settings
     settings.render()

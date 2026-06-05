@@ -5,3 +5,4 @@ google-auth-oauthlib>=1.2.0
 google-api-python-client>=2.120.0
 requests>=2.31.0
 pandas>=2.0.0
+pyvis>=0.3.1
