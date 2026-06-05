@@ -28,7 +28,15 @@ def render():
         st.error("pyvis not installed — add `pyvis>=0.3.1` to requirements.txt and redeploy.")
         return
 
-    leads = database.get_leads(limit=200)
+    mode = st.toggle("Show real leads (off = demo leads)", value=False, key="graph_mode")
+
+    if mode:
+        leads = database.get_leads(limit=200)
+    else:
+        from utils.scraper import get_demo_re_leads, get_demo_biz_leads
+        leads = get_demo_re_leads() + get_demo_biz_leads()
+        for l in leads:
+            l.setdefault("type", "real_estate" if "motivated_signals" in l else "business")
 
     if not leads:
         st.markdown("""

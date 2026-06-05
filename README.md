@@ -29,11 +29,16 @@ Two AI agents that run on demand:
 - Generate real AI emails from demo leads and send to yourself before going live
 - Not logged to vault or database — preview only
 
-**Obsidian Knowledge Graph**
-- Every lead auto-written as a markdown note to `vault/`
+**🕸️ Knowledge Graph page (in-app)**
+- Interactive network graph built with pyvis, rendered inside Streamlit
+- Toggle between demo leads and real leads from the database
+- Lead nodes colored by score (green/gold/red), city and deal type hub nodes
+- Draggable, zoomable, hover tooltips on every node
+
+**Obsidian Knowledge Graph (local)**
+- Every lead also auto-written as a markdown note to `vault/`
 - Demo leads → `vault/leads/demo/`, real leads → `vault/leads/`
-- Hub notes for cities, deal types, and owners create graph clusters automatically
-- Open `vault/` folder in Obsidian to see the interactive knowledge graph
+- Open `vault/` folder in Obsidian for the desktop graph view
 
 ---
 

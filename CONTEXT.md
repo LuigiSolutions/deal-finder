@@ -180,6 +180,19 @@ Run `SETUP_SQL` from `utils/database.py` once in Supabase SQL Editor. Falls back
 
 ---
 
+## Knowledge Graph Page — pages/graph.py
+
+Interactive pyvis network graph rendered inside Streamlit. Accessible via **🕸️ Knowledge Graph** in the left sidebar.
+
+- Toggle at top of page: **off = demo leads**, **on = real leads from database**
+- Lead nodes colored by score: green (8-10), gold (5-7), red (1-4); sized by score
+- City hub nodes (blue squares), deal type hub nodes (gold diamonds)
+- Owner hubs only shown when the same owner appears on multiple leads
+- Draggable, zoomable, hover tooltips on every node
+- Stats summary below graph: total leads, RE count, biz count, avg score, top lead
+
+---
+
 ## Known Working State (2026-06-05)
 
 - OpenRouter AI: working with `openai/gpt-oss-120b:free`
@@ -188,3 +201,4 @@ Run `SETUP_SQL` from `utils/database.py` once in Supabase SQL Editor. Falls back
 - Streamlit Cloud: deployed at deal-finder7.streamlit.app
 - Test Outreach tab: confirmed sending real AI-generated emails to luigisolutions7@gmail.com
 - Obsidian vault: seeded with 6 demo leads; open vault/ in Obsidian to view graph
+- Knowledge Graph page: working; demo/real toggle confirmed
