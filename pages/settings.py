@@ -4,7 +4,7 @@ import streamlit as st
 def render():
     st.markdown('<div class="section-title">⚙️ Settings & Setup Guide</div>', unsafe_allow_html=True)
 
-    tab1, tab2, tab3 = st.tabs(["🔑 API Keys", "📋 Setup Guide", "🧪 Test Connections"])
+    tab1, tab2, tab3, tab4 = st.tabs(["🔑 API Keys", "📋 Setup Guide", "🧪 Test Connections", "📤 Test Outreach"])
 
     with tab1:
         st.markdown("""
@@ -208,3 +208,95 @@ print(json.dumps(output))
         Outreach Log. Set up Gmail when ready to go live.
         </div>
         """, unsafe_allow_html=True)
+
+    with tab4:
+        st.markdown('<div class="section-title" style="font-size:1.1rem;">Test Outreach — Send to Yourself</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="info-box">
+        Sends one real estate email and one business email to <strong>your own address</strong>
+        using demo leads and live Gemini AI. Lets you review the exact tone and content before
+        going live. Requires Gemini and Gmail to be configured.
+        </div>
+        """, unsafe_allow_html=True)
+
+        from utils import scraper as _scraper, gemini as _gemini, gmail_sender as _gmail
+
+        to_addr = st.secrets.get("GMAIL_FROM_ADDRESS", "luigisolutions7@gmail.com")
+        sender_name = st.secrets.get("YOUR_NAME", "Kalob")
+
+        st.markdown(f"Test emails will be sent to **{to_addr}**")
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        col_re, col_biz = st.columns(2)
+
+        # ── Real Estate test ──────────────────────────────────────────────────
+        with col_re:
+            st.markdown("**🏠 Real Estate Lead**")
+            re_leads = _scraper.get_demo_re_leads()
+            re_names = [f"{l['name']} ({l['city']})" for l in re_leads]
+            re_idx = st.selectbox("Pick a demo lead", range(len(re_names)),
+                                  format_func=lambda i: re_names[i], key="test_re_lead")
+            re_lead = re_leads[re_idx]
+
+            with st.expander("Lead details", expanded=False):
+                st.json({k: v for k, v in re_lead.items() if k not in ("type",)})
+
+            if st.button("Generate & Send RE Test Email", key="test_re_btn", use_container_width=True):
+                with st.spinner("Writing email with Gemini..."):
+                    email_data = _gemini.write_re_email(re_lead, sender_name)
+
+                if not email_data:
+                    st.error("Gemini failed to generate the email — check GEMINI_API_KEY.")
+                else:
+                    st.markdown(f"**Subject:** {email_data['subject']}")
+                    st.text_area("Body preview", email_data["body"], height=200, key="test_re_body")
+
+                    subject = f"[TEST → {re_lead.get('owner_name','Owner')}] {email_data['subject']}"
+                    result = _gmail.send_email(
+                        to_email=to_addr,
+                        subject=subject,
+                        body=email_data["body"],
+                        from_name=sender_name,
+                    )
+                    if result["success"] and not result.get("simulated"):
+                        st.success(f"✅ Sent to {to_addr}")
+                    elif result.get("simulated"):
+                        st.info("📧 Simulated (Gmail not configured) — see body preview above")
+                    else:
+                        st.error(f"Send failed: {result['error']}")
+
+        # ── Business test ─────────────────────────────────────────────────────
+        with col_biz:
+            st.markdown("**🏢 Business Lead**")
+            biz_leads = _scraper.get_demo_biz_leads()
+            biz_names = [f"{l['name']} ({l['city']})" for l in biz_leads]
+            biz_idx = st.selectbox("Pick a demo lead", range(len(biz_names)),
+                                   format_func=lambda i: biz_names[i], key="test_biz_lead")
+            biz_lead = biz_leads[biz_idx]
+
+            with st.expander("Lead details", expanded=False):
+                st.json({k: v for k, v in biz_lead.items() if k not in ("type",)})
+
+            if st.button("Generate & Send Biz Test Email", key="test_biz_btn", use_container_width=True):
+                with st.spinner("Writing email with Gemini..."):
+                    email_data = _gemini.write_biz_email(biz_lead, sender_name)
+
+                if not email_data:
+                    st.error("Gemini failed to generate the email — check GEMINI_API_KEY.")
+                else:
+                    st.markdown(f"**Subject:** {email_data['subject']}")
+                    st.text_area("Body preview", email_data["body"], height=200, key="test_biz_body")
+
+                    subject = f"[TEST → {biz_lead.get('owner_name','Owner')}] {email_data['subject']}"
+                    result = _gmail.send_email(
+                        to_email=to_addr,
+                        subject=subject,
+                        body=email_data["body"],
+                        from_name=sender_name,
+                    )
+                    if result["success"] and not result.get("simulated"):
+                        st.success(f"✅ Sent to {to_addr}")
+                    elif result.get("simulated"):
+                        st.info("📧 Simulated (Gmail not configured) — see body preview above")
+                    else:
+                        st.error(f"Send failed: {result['error']}")
