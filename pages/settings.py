@@ -21,10 +21,11 @@ def render():
 # Your name (used in email signatures)
 YOUR_NAME = "Kalob Hagen"
 
-# ── FREE: Gemini Flash AI ──────────────────────────────────
-# Get free key at: https://aistudio.google.com/app/apikey
-# Free tier: 15 req/min, 1M tokens/day — more than enough
-GEMINI_API_KEY = "AIza..."
+# ── FREE: OpenRouter AI ───────────────────────────────────
+# Get free key at: https://openrouter.ai/ (no credit card)
+# Find free models at: https://openrouter.ai/models?q=free
+OPENROUTER_API_KEY = "sk-or-..."
+OPENROUTER_MODEL = "deepseek/deepseek-r1:free"
 
 # ── FREE: Supabase Database ───────────────────────────────
 # Create free project at: https://supabase.com
@@ -44,15 +45,16 @@ GMAIL_FROM_ADDRESS = "luigisolutions7@gmail.com"
         steps = [
             {
                 "num": "1",
-                "title": "Get Gemini Flash API Key (5 minutes)",
+                "title": "Get OpenRouter API Key (2 minutes)",
                 "content": """
-1. Go to **https://aistudio.google.com/app/apikey**
-2. Sign in with your Google account
-3. Click **Create API Key**
-4. Copy it → paste as `GEMINI_API_KEY` in secrets.toml
-5. Free tier: 15 requests/minute, 1 million tokens/day
+1. Go to **https://openrouter.ai/** → sign up free (no credit card)
+2. Click **Keys** in the left sidebar → **Create Key**
+3. Copy it → paste as `OPENROUTER_API_KEY` in secrets
+4. Go to **https://openrouter.ai/models?q=free** to see available free models
+5. Pick one and paste the model ID as `OPENROUTER_MODEL` in secrets
+   - Example: `deepseek/deepseek-r1:free`
 
-**Cost: $0.00 forever on free tier**
+**Cost: $0.00 — free models require no billing setup**
                 """,
             },
             {
@@ -168,15 +170,15 @@ print(json.dumps(output))
         col1, col2, col3 = st.columns(3)
 
         with col1:
-            if st.button("🤖 Test Gemini AI", use_container_width=True):
+            if st.button("🤖 Test AI", use_container_width=True):
                 from utils.gemini import ask
-                result = ask("Respond with exactly: GEMINI_OK")
-                if result and "GEMINI_OK" in result:
-                    st.success("✅ Gemini connected!")
+                result = ask("Respond with exactly: OK")
+                if result and "OK" in result:
+                    st.success(f"✅ AI connected!")
                 elif result:
-                    st.success(f"✅ Gemini connected: {result[:50]}")
+                    st.success(f"✅ AI connected: {result[:60]}")
                 else:
-                    st.error("❌ Gemini failed — check GEMINI_API_KEY in secrets")
+                    st.error("❌ AI failed — check OPENROUTER_API_KEY and OPENROUTER_MODEL in secrets")
 
         with col2:
             if st.button("🗄️ Test Supabase", use_container_width=True):
@@ -246,7 +248,7 @@ print(json.dumps(output))
                     email_data = _gemini.write_re_email(re_lead, sender_name)
 
                 if not email_data:
-                    st.error("Gemini failed to generate the email — check GEMINI_API_KEY.")
+                    st.error("AI failed to generate the email — check OPENROUTER_API_KEY and OPENROUTER_MODEL in secrets.")
                 else:
                     st.markdown(f"**Subject:** {email_data['subject']}")
                     st.text_area("Body preview", email_data["body"], height=200, key="test_re_body")
@@ -282,7 +284,7 @@ print(json.dumps(output))
                     email_data = _gemini.write_biz_email(biz_lead, sender_name)
 
                 if not email_data:
-                    st.error("Gemini failed to generate the email — check GEMINI_API_KEY.")
+                    st.error("AI failed to generate the email — check OPENROUTER_API_KEY and OPENROUTER_MODEL in secrets.")
                 else:
                     st.markdown(f"**Subject:** {email_data['subject']}")
                     st.text_area("Body preview", email_data["body"], height=200, key="test_biz_body")

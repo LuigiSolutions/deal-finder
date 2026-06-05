@@ -196,7 +196,7 @@ st.sidebar.markdown("---")
 st.sidebar.markdown("""
 <div style="font-size:0.78rem; color:#556677; line-height:1.6;">
 <strong style="color:#B8860B;">Free Tier Stack</strong><br>
-• Gemini Flash (AI)<br>
+• OpenRouter (AI)<br>
 • Supabase (Database)<br>
 • Gmail API (Email)<br>
 • Streamlit Cloud (Hosting)
