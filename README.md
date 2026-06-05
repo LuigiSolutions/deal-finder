@@ -7,50 +7,61 @@ Zero cost. Deployed at **deal-finder7.streamlit.app** on Streamlit Community Clo
 
 ## What It Does
 
-Two AI agents that run on demand (or on a schedule):
+Two AI agents that run on demand:
 
 **Real Estate Agent**
 - Searches Craigslist FSBO + web for motivated sellers in Northern Michigan
-- Targets seller financing, subject-to, lease-option, and DSCR income property deals
-- Scores each lead 1-10 based on motivated seller signals
-- Writes personalized outreach emails via Gemini Flash
+- Scores each lead 1-10 using a 4-factor rubric (timeline, bank involvement, down payment, motivation signals)
+- Highest-scoring leads contacted first
+- Writes personalized outreach emails via OpenRouter AI
 - Sends via Gmail API and logs everything to Supabase
 
 **Business Agent**
 - Searches BizBuySell + web for owner-operated Northern Michigan businesses
-- Targets SBA 7(a) + seller carry acquisition opportunities
-- Identifies exit signals (owner age, listing tenure, no succession plan)
-- Same email outreach and logging pipeline
+- Targets SBA 7(a) + seller carry acquisitions (near-zero down)
+- Same scoring, ordering, and email pipeline
 
 **Outreach Log**
-- Every email sent: owner name, email, business/property name, subject, full body, date/time stamp
+- Every email sent: owner name, email, subject, full body, date/time stamp
 - Filter by type, status, export to CSV
-- Mark replies manually
+
+**Settings → Test Outreach tab**
+- Generate real AI emails from demo leads and send to yourself before going live
 
 ---
 
 ## Total Cost: $0
 
-| Service | Free Tier | Limit |
+| Service | Free Tier | Notes |
 |---|---|---|
-| Gemini Flash (AI) | Free | 1M tokens/day, 15 req/min |
+| OpenRouter (AI) | Free | No credit card. Model set via `OPENROUTER_MODEL` secret |
 | Supabase (Database) | Free | 500MB, unlimited API calls |
 | Gmail API (Email) | Free | No usage fees |
 | Streamlit Cloud (Hosting) | Free | Unlimited public apps |
 
 ---
 
-## Setup (30 minutes total)
+## Setup
 
-### 1. Gemini API Key (5 min)
-1. Go to https://aistudio.google.com/app/apikey
-2. Create API Key
-3. Paste as `GEMINI_API_KEY` in secrets
+### 1. OpenRouter API Key (2 min)
+1. Go to https://openrouter.ai/ → sign up free (no credit card)
+2. Click **Keys** → **Create Key**
+3. Go to https://openrouter.ai/models?q=free and pick a free model — copy its ID
+4. Add to Streamlit secrets:
+   ```
+   OPENROUTER_API_KEY = "sk-or-..."
+   OPENROUTER_MODEL = "openai/gpt-oss-120b:free"
+   ```
 
 ### 2. Supabase (10 min)
 1. Create free project at https://supabase.com
 2. Copy Project URL and anon key from Settings → API
 3. Run the SQL from `utils/database.py` (`SETUP_SQL` variable) in SQL Editor
+4. Add to Streamlit secrets:
+   ```
+   SUPABASE_URL = "https://xxxx.supabase.co"
+   SUPABASE_ANON_KEY = "eyJ..."
+   ```
 
 ### 3. Gmail API (15 min)
 1. Go to https://console.cloud.google.com → New Project
@@ -58,32 +69,39 @@ Two AI agents that run on demand (or on a schedule):
 3. Create OAuth 2.0 credentials (Desktop app) → download JSON as `client_secret.json`
 4. Run locally: `python gmail_auth.py` (opens browser for Google sign-in)
 5. Copy the printed JSON and paste as `GMAIL_CREDENTIALS_JSON` in Streamlit secrets
-   - Use a single-line value or triple-single-quoted multiline TOML string
    - The access token auto-refreshes on every call — no manual renewal needed
 
 ### 4. Deploy to Streamlit Cloud (5 min)
-1. Push to private GitHub repo (never commit secrets.toml)
-2. Go to https://share.streamlit.io → Deploy
-3. Add secrets in App Settings → Secrets
+1. Push to a GitHub repo (never commit `.streamlit/secrets.toml`)
+2. Go to https://share.streamlit.io → Deploy → select `app.py`
+3. Add all secrets in App Settings → Secrets → Save
 
 ---
 
 ## Local Development
 
 ```bash
-# Clone / copy project
-cd deal-finder
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Create secrets file
 cp .streamlit/secrets.toml.example .streamlit/secrets.toml
-# Edit secrets.toml with your keys
-
-# Run
+# fill in your keys
 streamlit run app.py
 ```
+
+---
+
+## Lead Scoring Rubric (1-10)
+
+Higher score = better deal for a buyer who wants little to no money down and no bank.
+
+| Factor | Best (HIGH) | Worst (LOW) |
+|---|---|---|
+| Seller timeline | Immediate / urgent | Years away / no rush |
+| Bank involvement | No bank (seller finance, subject-to) | Full conventional loan required |
+| Down payment | Near zero | Large cash requirement |
+| Motivation signals | Estate, divorce, retirement, long DOM | Fresh listing, no signals |
+
+A **10** = sell immediately, $0 down, no bank involved.  
+A **1** = selling someday, large down payment, bank only.
 
 ---
 
@@ -111,13 +129,13 @@ pages/
   real_estate.py          — RE agent + lead management
   business.py             — Business agent + lead management
   outreach_log.py         — Full timestamped outreach history
-  settings.py             — API key setup + connection tests
+  settings.py             — API key setup + connection tests + test outreach
 utils/
-  database.py             — Supabase client + all DB operations
-  gemini.py               — Gemini Flash AI prompts + parsing
-  gmail_sender.py         — Gmail API email sender
-  scraper.py              — Free web scrapers (no API cost)
+  database.py             — Supabase client + all DB operations (leads sorted score DESC)
+  gemini.py               — OpenRouter AI: prompts, EMAIL_RULES, SCORING_RUBRIC
+  gmail_sender.py         — Gmail API email sender (auto token refresh)
+  scraper.py              — Free web scrapers + demo lead data
 .streamlit/
-  config.toml             — Dark theme with navy/gold colors
+  config.toml             — Dark theme (navy/gold)
   secrets.toml            — Your API keys (never commit this)
 ```
