@@ -94,7 +94,8 @@ CREATE INDEX IF NOT EXISTS outreach_sent_idx ON outreach(sent_at DESC);
 
 def upsert_lead(data: dict) -> Optional[dict]:
     """Insert a lead or update if name+address already exists."""
-    _vault_write_lead(data)
+    is_demo = data.pop("is_demo", False)
+    _vault_write_lead(data, demo=is_demo)
 
     client = get_client()
     if not client:

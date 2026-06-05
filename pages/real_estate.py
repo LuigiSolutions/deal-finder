@@ -95,6 +95,7 @@ def _run_re_agent(city: str, auto_email: bool, min_score: int, use_demo: bool):
         saved_leads = []
         for lead in raw_leads:
             lead["type"] = "real_estate"
+            lead["is_demo"] = use_demo
             # Nest extra fields in details
             details = {k: v for k, v in lead.items() if k not in [
                 "type", "name", "address", "city", "owner_name", "owner_email",

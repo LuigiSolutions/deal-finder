@@ -14,6 +14,7 @@ from pathlib import Path
 
 VAULT_DIR = Path(__file__).parent.parent / "vault"
 LEADS_DIR = VAULT_DIR / "leads"
+DEMO_DIR = VAULT_DIR / "leads" / "demo"
 HUBS_DIR = VAULT_DIR / "_hubs"
 
 
@@ -25,6 +26,7 @@ def _safe_filename(name: str) -> str:
 
 def _ensure_dirs():
     LEADS_DIR.mkdir(parents=True, exist_ok=True)
+    DEMO_DIR.mkdir(parents=True, exist_ok=True)
     HUBS_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -50,10 +52,13 @@ def _score_bar(score: int) -> str:
     return "█" * score + "░" * (10 - score)
 
 
-def write_lead(lead: dict) -> None:
-    """Write or overwrite a lead's markdown note in the vault."""
+def write_lead(lead: dict, demo: bool = False) -> None:
+    """Write or overwrite a lead's markdown note in the vault.
+    Demo leads go to leads/demo/, real leads go to leads/.
+    """
     try:
         _ensure_dirs()
+        target_dir = DEMO_DIR if demo else LEADS_DIR
 
         name = lead.get("name", "Unknown Lead")
         lead_type = lead.get("type", "unknown")
@@ -141,7 +146,7 @@ def write_lead(lead: dict) -> None:
         )
 
         filename = f"{_safe_filename(name)}.md"
-        (LEADS_DIR / filename).write_text(frontmatter + "\n" + body, encoding="utf-8")
+        (target_dir / filename).write_text(frontmatter + "\n" + body, encoding="utf-8")
 
     except Exception:
         pass  # Never let vault errors break the main app

@@ -124,6 +124,7 @@ def _run_biz_agent(city: str, auto_email: bool, min_score: int, use_demo: bool, 
         st.write("💾 Saving to database...")
         for lead in raw_leads:
             lead["type"] = "business"
+            lead["is_demo"] = use_demo
             details = {k: v for k, v in lead.items() if k not in [
                 "type", "name", "address", "city", "owner_name", "owner_email",
                 "owner_phone", "source", "source_url", "score", "status", "notes"
