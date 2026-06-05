@@ -23,6 +23,17 @@ def _node_size(score: int) -> int:
 
 def render():
     st.markdown('<div class="section-title">🕸️ Knowledge Graph</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <style>
+    @media (max-width: 768px) {
+        .graph-tip { display: block !important; }
+    }
+    .graph-tip { display: none; }
+    </style>
+    <div class="graph-tip info-box">
+    Tip: graph works best in landscape mode on mobile. Pinch to zoom, drag to pan.
+    </div>
+    """, unsafe_allow_html=True)
 
     if not PYVIS_AVAILABLE:
         st.error("pyvis not installed — add `pyvis>=0.3.1` to requirements.txt and redeploy.")

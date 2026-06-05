@@ -178,6 +178,109 @@ st.markdown("""
     .stDataFrame {
         background: #0F1B2D;
     }
+
+    /* ── Mobile optimizations (≤768px) ─────────────────────────────────────
+       All desktop styles above are untouched. These only activate on small
+       screens via media queries.
+    ──────────────────────────────────────────────────────────────────────── */
+
+    @media (max-width: 768px) {
+
+        /* Smaller header so it fits on one screen without scrolling */
+        .main-header {
+            font-size: 2rem !important;
+            letter-spacing: 0.06em !important;
+        }
+
+        .sub-header {
+            font-size: 0.8rem !important;
+            margin-bottom: 1.2rem !important;
+        }
+
+        /* Metric cards — tighter padding on small screens */
+        .metric-card {
+            padding: 0.8rem 0.6rem !important;
+        }
+
+        .metric-number {
+            font-size: 1.8rem !important;
+        }
+
+        .metric-label {
+            font-size: 0.68rem !important;
+        }
+
+        /* Buttons — min 44px height for comfortable touch targets */
+        .stButton > button {
+            min-height: 44px !important;
+            padding: 0.6rem 1rem !important;
+            font-size: 0.9rem !important;
+            width: 100% !important;
+        }
+
+        /* Kill the hover lift on touch — no hover on mobile */
+        .stButton > button:hover {
+            transform: none !important;
+        }
+
+        /* Deal rows — less horizontal padding */
+        .deal-row {
+            padding: 0.75rem 0.8rem !important;
+        }
+
+        .deal-name {
+            font-size: 0.92rem !important;
+        }
+
+        .deal-meta {
+            font-size: 0.75rem !important;
+        }
+
+        /* Section titles */
+        .section-title {
+            font-size: 1.1rem !important;
+        }
+
+        /* Info boxes */
+        .info-box {
+            font-size: 0.82rem !important;
+            padding: 0.65rem 0.8rem !important;
+        }
+
+        /* Tabs — smaller text so all tabs fit on one row */
+        .stTabs [data-baseweb="tab"] {
+            font-size: 0.78rem !important;
+            padding: 6px 8px !important;
+        }
+
+        /* Text inputs / textareas — ensure they fill the width */
+        div[data-testid="stTextInput"] input,
+        div[data-testid="stTextArea"] textarea {
+            font-size: 16px !important; /* prevents iOS auto-zoom on focus */
+        }
+
+        /* Sidebar nav radio labels — bigger tap targets */
+        section[data-testid="stSidebar"] label {
+            padding: 6px 0 !important;
+            font-size: 0.95rem !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+
+        /* Extra-small phones */
+        .main-header {
+            font-size: 1.55rem !important;
+        }
+
+        .metric-number {
+            font-size: 1.5rem !important;
+        }
+
+        .section-title {
+            font-size: 1rem !important;
+        }
+    }
 </style>
 """, unsafe_allow_html=True)
 

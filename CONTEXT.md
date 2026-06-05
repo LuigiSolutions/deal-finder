@@ -178,6 +178,12 @@ Run `SETUP_SQL` from `utils/database.py` once in Supabase SQL Editor. Falls back
 - Fonts: Bebas Neue (headers), Inter (body)
 - All custom CSS injected via `st.markdown()` in `app.py`
 
+**Mobile optimization** (added via CSS media queries — desktop styles untouched):
+- `≤768px`: smaller header (2rem), tighter metric cards, buttons min 44px height for touch targets, `font-size: 16px` on inputs to prevent iOS auto-zoom, bigger sidebar tap targets, no hover lift on buttons
+- `≤480px`: extra-small phone adjustments (header 1.55rem, smaller metrics/section titles)
+- Knowledge Graph page shows a landscape tip on mobile screens
+- Streamlit handles sidebar collapse and column stacking natively on mobile
+
 ---
 
 ## Knowledge Graph Page — pages/graph.py

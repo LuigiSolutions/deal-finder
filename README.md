@@ -98,6 +98,21 @@ Two AI agents that run on demand:
 
 ---
 
+## Mobile Support
+
+The app is optimized for both desktop and mobile. CSS media queries activate on small screens without touching desktop styles:
+
+- Header and metric fonts scale down for small screens
+- Buttons are minimum 44px tall for comfortable touch targets
+- Text inputs use `font-size: 16px` to prevent iOS auto-zoom on focus
+- Sidebar nav tap targets are larger on mobile
+- Hover effects disabled on touch (no accidental lifts)
+- Knowledge Graph shows a landscape orientation tip on mobile
+
+Desktop layout and all styling is fully preserved — mobile CSS only activates via `@media (max-width: 768px)`.
+
+---
+
 ## Local Development
 
 ```bash
