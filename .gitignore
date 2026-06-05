@@ -1,4 +1,6 @@
 .streamlit/secrets.toml
+client_secret.json
+token.json
 __pycache__/
 *.pyc
 .env

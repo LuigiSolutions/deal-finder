@@ -1,7 +1,7 @@
 # Northern Michigan Deal Finder
 **AI-powered acquisition lead discovery & outreach — Real Estate · Businesses**
 
-Zero cost. Deployed on Streamlit Community Cloud.
+Zero cost. Deployed at **deal-finder7.streamlit.app** on Streamlit Community Cloud.
 
 ---
 
@@ -55,9 +55,11 @@ Two AI agents that run on demand (or on a schedule):
 ### 3. Gmail API (15 min)
 1. Go to https://console.cloud.google.com → New Project
 2. Enable Gmail API (APIs & Services → Library)
-3. Create OAuth 2.0 credentials (Desktop app) → download JSON
-4. Run locally: `python gmail_auth.py`
-5. Paste output into `GMAIL_CREDENTIALS_JSON` in secrets
+3. Create OAuth 2.0 credentials (Desktop app) → download JSON as `client_secret.json`
+4. Run locally: `python gmail_auth.py` (opens browser for Google sign-in)
+5. Copy the printed JSON and paste as `GMAIL_CREDENTIALS_JSON` in Streamlit secrets
+   - Use a single-line value or triple-single-quoted multiline TOML string
+   - The access token auto-refreshes on every call — no manual renewal needed
 
 ### 4. Deploy to Streamlit Cloud (5 min)
 1. Push to private GitHub repo (never commit secrets.toml)

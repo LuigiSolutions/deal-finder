@@ -194,10 +194,11 @@ print(json.dumps(output))
         with col3:
             if st.button("📧 Test Gmail", use_container_width=True):
                 from utils.gmail_sender import test_connection
-                if test_connection():
-                    st.success("✅ Gmail connected!")
+                ok, detail = test_connection()
+                if ok:
+                    st.success(f"✅ Gmail connected: {detail}")
                 else:
-                    st.info("ℹ️ Gmail not configured — emails will simulate (log but not send)")
+                    st.warning(f"⚠️ Gmail: {detail}")
 
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown("""

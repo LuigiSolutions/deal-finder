@@ -26,10 +26,17 @@ def get_gmail_service():
     creds_json = st.secrets.get("GMAIL_CREDENTIALS_JSON", "")
     if not creds_json:
         return None
-    creds_json = creds_json.replace("\n", "").replace("  ", " ").strip()
+
+    # Normalize whitespace — handles multi-line TOML triple-quoted strings
+    creds_json = " ".join(creds_json.split())
 
     try:
         creds_data = json.loads(creds_json)
+    except json.JSONDecodeError as e:
+        st.warning(f"Gmail credentials JSON is malformed: {e}")
+        return None
+
+    try:
         creds = Credentials(
             token=creds_data.get("token"),
             refresh_token=creds_data.get("refresh_token"),
@@ -38,6 +45,11 @@ def get_gmail_service():
             client_secret=creds_data.get("client_secret"),
             scopes=["https://www.googleapis.com/auth/gmail.send"]
         )
+        # The stored access token expires after ~1 hour; always refresh via
+        # the refresh_token so we never fail on a stale access token.
+        if creds.refresh_token:
+            from google.auth.transport.requests import Request as GoogleRequest
+            creds.refresh(GoogleRequest())
         return build("gmail", "v1", credentials=creds)
     except Exception as e:
         st.warning(f"Gmail auth error: {e}")
@@ -80,12 +92,17 @@ def send_email(to_email, subject, body, from_name="Kalob Hagen", reply_to=None):
         return {"success": False, "message_id": None, "error": str(e), "simulated": False}
 
 
-def test_connection():
+def test_connection() -> tuple:
+    """Return (ok: bool, detail: str). detail is an email address on success or an error message on failure."""
+    if not GMAIL_AVAILABLE:
+        return False, "google-auth libraries not installed (check requirements.txt)"
+    if not st.secrets.get("GMAIL_CREDENTIALS_JSON", ""):
+        return False, "GMAIL_CREDENTIALS_JSON not set in Streamlit secrets"
     service = get_gmail_service()
     if not service:
-        return False
+        return False, "Failed to initialize Gmail service (see warning above)"
     try:
-        service.users().getProfile(userId="me").execute()
-        return True
-    except Exception:
-        return False
+        profile = service.users().getProfile(userId="me").execute()
+        return True, profile.get("emailAddress", "connected")
+    except Exception as e:
+        return False, str(e)
