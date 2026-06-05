@@ -1,71 +1,68 @@
 """
-Google Gemini Flash — completely free tier
-- 15 requests/minute
-- 1,000,000 tokens/day
-- No credit card required
-
-Get your free key: https://aistudio.google.com/app/apikey
+AI text generation via OpenRouter — free tier
+Free models require no credit card.
+Get your free key at: https://openrouter.ai/
 """
 
 import streamlit as st
 import json
 import time
 import re
+import requests
 from typing import Optional
 
-try:
-    import google.generativeai as genai
-    GEMINI_AVAILABLE = True
-except ImportError:
-    GEMINI_AVAILABLE = False
+OPENROUTER_BASE = "https://openrouter.ai/api/v1/chat/completions"
+DEFAULT_MODEL = "meta-llama/llama-3.1-8b-instruct:free"
 
 
 def get_model():
-    """Return configured Gemini Flash model."""
-    if not GEMINI_AVAILABLE:
-        return None
-    api_key = st.secrets.get("GEMINI_API_KEY", "")
-    if not api_key:
-        return None
-    genai.configure(api_key=api_key)
-    return genai.GenerativeModel("gemini-2.0-flash-lite")
+    """Return API key if configured, else None."""
+    return st.secrets.get("OPENROUTER_API_KEY", "") or None
 
 
 def ask(prompt: str, system: str = "", retries: int = 3) -> Optional[str]:
-    """Send a prompt to Gemini Flash and return the text response."""
-    model = get_model()
-    if not model:
+    """Send a prompt to OpenRouter and return the text response."""
+    api_key = get_model()
+    if not api_key:
         return None
 
-    full_prompt = f"{system}\n\n{prompt}" if system else prompt
+    model = st.secrets.get("OPENROUTER_MODEL", DEFAULT_MODEL)
+    messages = []
+    if system:
+        messages.append({"role": "system", "content": system})
+    messages.append({"role": "user", "content": prompt})
 
     for attempt in range(retries):
         try:
-            response = model.generate_content(full_prompt)
-            return response.text
+            resp = requests.post(
+                OPENROUTER_BASE,
+                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                json={"model": model, "messages": messages},
+                timeout=45,
+            )
+            resp.raise_for_status()
+            return resp.json()["choices"][0]["message"]["content"]
         except Exception as e:
             err = str(e)
-            if ("429" in err or "quota" in err.lower()) and attempt < retries - 1:
-                wait = (attempt + 1) * 15  # 15s, 30s, 45s
-                time.sleep(wait)
+            is_rate_limit = "429" in err or "quota" in err.lower() or "rate" in err.lower()
+            if is_rate_limit and attempt < retries - 1:
+                time.sleep((attempt + 1) * 15)
             else:
-                st.warning(f"Gemini error: {err}")
+                st.warning(f"AI error: {err}")
                 return None
     return None
 
 
 def ask_json(prompt: str, system: str = "") -> Optional[dict]:
-    """Ask Gemini and parse JSON response."""
+    """Ask and parse JSON response."""
     json_system = (system or "") + "\n\nYou must respond with ONLY valid JSON. No markdown, no explanation, no code fences."
     raw = ask(prompt, json_system)
     if not raw:
         return None
-    # Strip any accidental code fences
     clean = re.sub(r"```(?:json)?|```", "", raw).strip()
     try:
         return json.loads(clean)
     except json.JSONDecodeError:
-        # Try to extract first JSON object/array
         match = re.search(r"[\[{].*[\]}]", clean, re.DOTALL)
         if match:
             try:
@@ -246,7 +243,7 @@ def score_deal(lead: dict, lead_type: str) -> int:
     prompt = f"""
 Score this {lead_type} acquisition opportunity from 1-10 based on:
 - Creative financing viability
-- Motivated seller signals  
+- Motivated seller signals
 - Location quality (Northern Michigan)
 - Cash flow potential
 
