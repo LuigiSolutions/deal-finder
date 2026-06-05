@@ -28,7 +28,7 @@ def get_model():
     if not api_key:
         return None
     genai.configure(api_key=api_key)
-    return genai.GenerativeModel("gemini-1.5-flash")
+    return genai.GenerativeModel("gemini-2.0-flash")
 
 
 def ask(prompt: str, system: str = "", retries: int = 3) -> Optional[str]:
